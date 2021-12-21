@@ -1,2 +1,2 @@
-cargo:rustc-env=TYPENUM_BUILD_CONSTS=/home/inojelis/messen/contract/target/debug/build/typenum-a5652ec6ecb993a5/out/consts.rs
-cargo:rustc-env=TYPENUM_BUILD_OP=/home/inojelis/messen/contract/target/debug/build/typenum-a5652ec6ecb993a5/out/op.rs
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/home/inojelis/messenger_is_near/contract/target/debug/build/typenum-a5652ec6ecb993a5/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/home/inojelis/messenger_is_near/contract/target/debug/build/typenum-a5652ec6ecb993a5/out/op.rs

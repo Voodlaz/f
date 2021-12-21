@@ -17326,7 +17326,7 @@ __exportStar(require("./browser-connect"), exports);
 require("error-polyfill");
 
 },{"./key_stores/browser-index":"../node_modules/near-api-js/lib/key_stores/browser-index.js","./common-index":"../node_modules/near-api-js/lib/common-index.js","./browser-connect":"../node_modules/near-api-js/lib/browser-connect.js","error-polyfill":"../node_modules/error-polyfill/index.js"}],"config.js":[function(require,module,exports) {
-var CONTRACT_NAME = "dev-1639133650425-99568139427347" || 'messen';
+var CONTRACT_NAME = "dev-1639526537218-97879169889700" || 'messen';
 
 function getConfig(env) {
   switch (env) {
@@ -17445,7 +17445,7 @@ function _initContract() {
             _context.next = 7;
             return new _nearApiJs.Contract(window.walletConnection.account(), nearConfig.contractName, {
               // View methods are read only. They don't modify the state, but usually return some value.
-              viewMethods: ['get_greeting'],
+              viewMethods: ['get_messages'],
               // Change methods can modify the state. But you don't receive the returned value when called.
               changeMethods: ['send_message']
             });
@@ -17610,9 +17610,7 @@ function _fetchGreeting() {
         switch (_context2.prev = _context2.next) {
           case 0:
             _context2.next = 2;
-            return contract.get_greeting({
-              account_id: window.accountId
-            });
+            return contract.get_messages({});
 
           case 2:
             currentGreeting = _context2.sent;
@@ -17664,7 +17662,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37031" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40407" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
