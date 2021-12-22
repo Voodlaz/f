@@ -18,6 +18,7 @@ pub struct Message {
     content: String,
 }
 
+// This struct is needed for fn listen in impl contract in the end of file.
 #[derive(Debug, PanicOnDefault, BorshDeserialize, BorshSerialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct MessageWithLen {
@@ -25,6 +26,7 @@ pub struct MessageWithLen {
     pub content: Vec<Message>,
 }
 
+// used for Contract::lsiten, implemented in the end of file
 impl MessageWithLen {
     pub fn new(len: u64, content: Vec<Message>) -> Self {
         MessageWithLen {
@@ -64,8 +66,6 @@ impl Contract {
 
                 let mut messages: Vec<Message> = Vec::new();
 
-                // Check for default is accompanied "&& count < len"(len is
-                // the name of the varible which has value "self.messages.len();")
                 while count < amount && count == len {
                     let message = self.messages.get(len - count).unwrap_or_default();
                     if message == default {
@@ -79,12 +79,21 @@ impl Contract {
             }
         }
     }
-
+    // we load 50 messages in advance, so when a person is scrolling
+    // through the cronological line, and gets close to the limit
+    // of already loaded messages on client, more 50 messages will
+    // load(WIP), so he would have a seamless reading experience.
+    // NOTE: this decison is not final, and can change in future
     pub fn get_messages(&self) -> Option<MessageWithLen> {
         self.load_messages(50)
     }
 
-    // listen for any new messages since the last was sent from the smart contract
+    // listen for any new messages since the last was sent from the smart contract.
+    // Uses MessageWithLen to send len of messages Vector with it's contents, so
+    // the client could send back the len when it wants to check for new messages.
+    // If the Vector is bigger than the one sent by client, it means that new
+    // messages were sent, and current len minus len sent by client equals the
+    // amount of new messages, which the functions sends to client.
     pub fn listen(&self, old_len: u64) -> Option<MessageWithLen> {
         let current_len = self.messages.len();
         let len = current_len - old_len;
