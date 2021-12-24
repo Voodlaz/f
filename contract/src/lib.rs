@@ -63,10 +63,10 @@ mod tests {
         vecr.push(Message::new(None, sender.clone(), "first".to_string()));
 
         // get_message tests
-        /*assert_eq!(
+        assert_eq!(
             MessageWithLen::new(3, vecr).content,
             contract.get_messages().unwrap().content
-        );*/
+        );
         //listen test
         /*assert_eq!(
             MessageWithLen::new(1, vecr).content,

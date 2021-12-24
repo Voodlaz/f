@@ -66,13 +66,12 @@ impl Contract {
 
                 let mut messages: Vec<Message> = Vec::new();
 
-                while count < amount && count == len {
+                while count < amount && count < len + 1 {
                     let message = self.messages.get(len - count).unwrap_or_default();
                     if message == default {
                         break;
                     }
                     messages.push(message);
-                    println!("{}", count);
                     count += 1;
                 }
                 Some(MessageWithLen::new(len, messages))
