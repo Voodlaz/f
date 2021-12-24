@@ -26,7 +26,7 @@ pub struct MessageWithLen {
     pub content: Vec<Message>,
 }
 
-// used for Contract::listen, implemented in the end of file
+// used for Contract::lsiten, implemented in the end of file
 impl MessageWithLen {
     pub fn new(len: u64, content: Vec<Message>) -> Self {
         MessageWithLen {
