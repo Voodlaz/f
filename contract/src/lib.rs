@@ -5,7 +5,7 @@ use near_sdk::collections::Vector;
 use near_sdk::{env, near_bindgen, setup_alloc, PanicOnDefault};
 
 use crate::message::*;
-use near_sdk::serde::Serialize;
+//use near_sdk::serde::Serialize;
 
 setup_alloc!();
 
@@ -51,21 +51,27 @@ mod tests {
 
         let mut contract = Contract::new();
         let sender = context.predecessor_account_id;
+        let mut count1: u64 = 0;
 
-        contract.send_message(None, "first".to_string());
-        contract.send_message(None, "second".to_string());
-        contract.send_message(None, "third".to_string());
+        while count1 < 150 {
+            contract.send_message(None, "first".to_string());
+            contract.send_message(None, "second".to_string());
+            count1 += 1;
+        }
 
         let mut vecr = Vec::new();
+        let mut count2: u64 = 0;
 
-        vecr.push(Message::new(None, sender.clone(), "third".to_string()));
-        vecr.push(Message::new(None, sender.clone(), "second".to_string()));
-        vecr.push(Message::new(None, sender.clone(), "first".to_string()));
+        while count2 < 25 {
+            vecr.push(Message::new(None, sender.clone(), "second".to_string()));
+            vecr.push(Message::new(None, sender.clone(), "first".to_string()));
+            count2 += 1;
+        }
 
         // get_message tests
         assert_eq!(
             MessageWithLen::new(3, vecr).content,
-            contract.get_messages().unwrap().content
+            contract.get_messages(3).unwrap().content
         );
         //listen test
         /*assert_eq!(
@@ -77,5 +83,7 @@ mod tests {
             MessageWithLen::new(3, vecr).len,
             contract.get_messages().unwrap().len
         )*/
+        //println!("{:?}", contract.get_messages(2).unwrap().content);
+        //println!("{:?}", contract.get_messages(2).unwrap().content.len());
     }
 }
