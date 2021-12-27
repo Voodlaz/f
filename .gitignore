@@ -21,6 +21,9 @@
 # cache
 /.cache
 
+# dist
+/dist
+
 # misc
 .DS_Store
 .env.local
