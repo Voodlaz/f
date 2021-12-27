@@ -85,7 +85,7 @@ impl Contract {
                 u64::default equals to zero, so unwrap_or_default works*/
                 // what about making the fronted able to request max levels?
                 if len_minus_levels == 0 {
-                    len_minus_levels = len - len % 50
+                    len_minus_levels = len % 50;
                 }
 
                 let mut messages: Vec<Message> = Vec::new();
@@ -102,7 +102,6 @@ impl Contract {
                     messages.push(message);
                     count += 1;
                 }
-                println!("{:?}", messages.len());
                 Some(MessageWithLen::new(len, messages))
             }
         }
