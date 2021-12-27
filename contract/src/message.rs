@@ -21,6 +21,7 @@ pub struct Message {
 }
 
 // This struct is needed for fn listen in impl contract in the end of file.
+// Also the fields are public only for testing, and should be removed in future
 #[derive(Debug, PanicOnDefault, BorshDeserialize, BorshSerialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct MessageWithLen {

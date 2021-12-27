@@ -13,7 +13,7 @@ setup_alloc!();
 #[derive(PanicOnDefault, BorshDeserialize, BorshSerialize)]
 //#[serde(crate = "near_sdk::serde")]
 pub struct Contract {
-    pub messages: Vector<message::Message>,
+    messages: Vector<message::Message>,
 }
 
 #[near_bindgen]
