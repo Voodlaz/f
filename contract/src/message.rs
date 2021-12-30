@@ -59,7 +59,7 @@ impl Contract {
     }
 
     #[private]
-    pub fn load_messages(&self, amount: u64, levels: u64) -> Option<MessageWithLen> {
+    fn load_messages(&self, amount: u64, levels: u64) -> Option<MessageWithLen> {
         match self.messages.is_empty() {
             true => None,
             false => {
@@ -155,38 +155,53 @@ mod tests {
             .build()
     }
 
-    #[test]
-    fn plain_text() {
-        let context = get_context(false);
-        testing_env!(context.clone());
-        let mut contract = Contract::new();
-        let sender = context.clone().predecessor_account_id;
-
+    // makes a Vec of messages, sends them to contract
+    // and gives back the list, so it could be possible
+    // to test out view methods
+    fn view_methods(contract: &mut Contract, sender: String) -> Vec<Message> {
         let mut vecr: Vec<Message> = Vec::new();
-        let mut count = 0;
+        //let mut iterator =
 
-        while count < 57 {
-            vecr.push(Message::new(None, sender.clone(), count.to_string()));
-            count += 1;
+        for i in 0..57 {
+            vecr.push(Message::new(None, sender.clone(), i.to_string()))
         }
 
-        for i in &vecr {
+        for i in vecr.iter() {
             contract.send_message(None, i.content.clone())
         }
 
-        // get_message tests
+        vecr
+    }
+
+    #[test]
+    fn get_messages() {
+        let context = get_context(false);
+        testing_env!(context.clone());
+        let mut contract = Contract::new();
+
+        let vecr = view_methods(&mut contract, context.clone().predecessor_account_id);
+
         assert_eq!(
             {
                 let mut result: Vec<Message> = Vec::new();
-                for i in &vecr[&vecr.len() - 50..] {
+                for i in &vecr[vecr.len() - 50..] {
                     result.insert(0, i.clone())
                 }
                 result
             },
             contract.get_messages(0).unwrap().content
         );
-        //listen test
-        /*assert_eq!(
+    }
+
+    #[test]
+    fn listen() {
+        let context = get_context(false);
+        testing_env!(context.clone());
+        let mut contract = Contract::new();
+
+        let vecr = view_methods(&mut contract, context.predecessor_account_id);
+
+        assert_eq!(
             {
                 let mut result: Vec<Message> = Vec::new();
                 for i in &vecr[24..] {
@@ -195,14 +210,6 @@ mod tests {
                 result
             },
             contract.listen(24).unwrap().content
-        );*/
-        // len test
-        /*assert_eq!(
-            MessageWithLen::new(3, vecr).len,
-            contract.get_messages().unwrap().len
-        )*/
-        //println!("{:?}", contract.listen(24).unwrap().len);
-        //println!("{:?}", contract.get_messages(0));
-        //println!("{:?}", env::used_gas());
+        );
     }
 }
