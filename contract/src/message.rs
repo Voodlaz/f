@@ -1,8 +1,7 @@
 // Some comments could probably fit in implementation doc
-
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::Vector;
 use near_sdk::{env, near_bindgen};
+//use std::iter::IntoIterator;
 
 use crate::*;
 
@@ -10,14 +9,16 @@ use near_sdk::serde::{Deserialize, Serialize};
 
 // TODO We will need a proper struct for account, for holding additional account data
 // like pfp's or whatever
-#[derive(Debug, Default, BorshSerialize, BorshDeserialize, PartialEq, Serialize, Deserialize)]
+#[derive(
+    Debug, Default, BorshSerialize, BorshDeserialize, PartialEq, Serialize, Deserialize, Clone,
+)]
 #[serde(crate = "near_sdk::serde")]
 pub struct Message {
     /*timestamp: TimeStamp,*/
     /*attached_content: File,*/
     receiver: Option<String>,
     sender: String,
-    content: String,
+    pub content: String,
 }
 
 // This struct is needed for fn listen in impl contract in the end of file.
@@ -54,15 +55,14 @@ impl Contract {
     pub fn send_message(&mut self, receiver: Option<String>, message: String) {
         let sender = env::predecessor_account_id();
 
-        self.messages
-            .push(&Message::new(receiver, sender, message.to_string()));
+        self.messages.push(&Message::new(receiver, sender, message));
     }
 
     #[private]
     pub fn load_messages(&self, amount: u64, levels: u64) -> Option<MessageWithLen> {
         match self.messages.is_empty() {
             true => None,
-            _ => {
+            false => {
                 let mut count = 1;
                 let len = self.messages.len();
                 let mut len_minus_levels;
@@ -121,6 +121,8 @@ impl Contract {
     If the Vector is bigger than the one sent by client, it means that new
     messages were sent, and current len minus len sent by client equals the
     amount of new messages, which the functions sends to client.*/
+    //
+    /* should we load only the last ones, or just messages after old_len?*/
     pub fn listen(&self, old_len: u64) -> Option<MessageWithLen> {
         let current_len = self.messages.len();
         let len = current_len - old_len;
@@ -138,3 +140,69 @@ impl Contract {
 }
 
 //MessageWithLen::new(self.messages.len(), get_messages())
+
+#[cfg(all(test, not(target_arch = "wasm32")))]
+mod tests {
+    use super::*;
+    use near_sdk::test_utils::VMContextBuilder;
+    use near_sdk::{testing_env, MockedBlockchain, VMContext};
+    use std::convert::TryInto;
+
+    fn get_context(is_view: bool) -> VMContext {
+        VMContextBuilder::new()
+            .signer_account_id("bob.near".try_into().unwrap())
+            .is_view(is_view)
+            .build()
+    }
+
+    #[test]
+    fn plain_text() {
+        let context = get_context(false);
+        testing_env!(context.clone());
+        let mut contract = Contract::new();
+        let sender = context.clone().predecessor_account_id;
+
+        let mut vecr: Vec<Message> = Vec::new();
+        let mut count = 0;
+
+        while count < 57 {
+            vecr.push(Message::new(None, sender.clone(), count.to_string()));
+            count += 1;
+        }
+
+        for i in &vecr {
+            contract.send_message(None, i.content.clone())
+        }
+
+        // get_message tests
+        assert_eq!(
+            {
+                let mut result: Vec<Message> = Vec::new();
+                for i in &vecr[&vecr.len() - 50..] {
+                    result.insert(0, i.clone())
+                }
+                result
+            },
+            contract.get_messages(0).unwrap().content
+        );
+        //listen test
+        /*assert_eq!(
+            {
+                let mut result: Vec<Message> = Vec::new();
+                for i in &vecr[24..] {
+                    result.insert(0, i.clone())
+                }
+                result
+            },
+            contract.listen(24).unwrap().content
+        );*/
+        // len test
+        /*assert_eq!(
+            MessageWithLen::new(3, vecr).len,
+            contract.get_messages().unwrap().len
+        )*/
+        //println!("{:?}", contract.listen(24).unwrap().len);
+        //println!("{:?}", contract.get_messages(0));
+        //println!("{:?}", env::used_gas());
+    }
+}

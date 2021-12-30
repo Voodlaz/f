@@ -2,9 +2,10 @@ mod message;
 
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::Vector;
-use near_sdk::{env, near_bindgen, setup_alloc, PanicOnDefault};
+use near_sdk::{near_bindgen, setup_alloc, PanicOnDefault};
 
-use crate::message::*;
+use crate::message::Message;
+//use rand::random;
 //use near_sdk::serde::Serialize;
 
 setup_alloc!();
@@ -27,63 +28,5 @@ impl Contract {
             //members: members,
             messages: messages,
         }
-    }
-}
-
-#[cfg(all(test, not(target_arch = "wasm32")))]
-mod tests {
-    use super::*;
-    use near_sdk::test_utils::VMContextBuilder;
-    use near_sdk::{testing_env, MockedBlockchain, VMContext};
-    use std::convert::TryInto;
-
-    fn get_context(is_view: bool) -> VMContext {
-        VMContextBuilder::new()
-            .signer_account_id("bob.near".try_into().unwrap())
-            .is_view(is_view)
-            .build()
-    }
-
-    #[test]
-    fn plain_text() {
-        let context = get_context(false);
-        testing_env!(context.clone());
-
-        let mut contract = Contract::new();
-        let sender = context.predecessor_account_id;
-        let mut count1: u64 = 0;
-
-        while count1 < 150 {
-            contract.send_message(None, "first".to_string());
-            contract.send_message(None, "second".to_string());
-            count1 += 1;
-        }
-
-        let mut vecr = Vec::new();
-        let mut count2: u64 = 0;
-
-        while count2 < 25 {
-            vecr.push(Message::new(None, sender.clone(), "second".to_string()));
-            vecr.push(Message::new(None, sender.clone(), "first".to_string()));
-            count2 += 1;
-        }
-
-        // get_message tests
-        assert_eq!(
-            MessageWithLen::new(3, vecr).content,
-            contract.get_messages(3).unwrap().content
-        );
-        //listen test
-        /*assert_eq!(
-            MessageWithLen::new(1, vecr).content,
-            contract.listen(1).unwrap().content
-        );*/
-        // len test
-        /*assert_eq!(
-            MessageWithLen::new(3, vecr).len,
-            contract.get_messages().unwrap().len
-        )*/
-        //println!("{:?}", contract.get_messages(2).unwrap().content);
-        //println!("{:?}", contract.get_messages(2).unwrap().content.len());
     }
 }
