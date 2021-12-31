@@ -4,7 +4,7 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::Vector;
 use near_sdk::{near_bindgen, setup_alloc, PanicOnDefault};
 
-use crate::message::Message;
+
 //use rand::random;
 //use near_sdk::serde::Serialize;
 
@@ -26,7 +26,7 @@ impl Contract {
 
         Self {
             //members: members,
-            messages: messages,
+            messages,
         }
     }
 }

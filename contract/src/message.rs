@@ -34,8 +34,8 @@ pub struct MessageWithLen {
 impl MessageWithLen {
     pub fn new(len: u64, content: Vec<Message>) -> Self {
         MessageWithLen {
-            len: len,
-            content: content,
+            len,
+            content,
         }
     }
 }
@@ -43,8 +43,8 @@ impl MessageWithLen {
 impl Message {
     pub fn new(receiver: Option<String>, sender: String, message: String) -> Self {
         Self {
-            receiver: receiver,
-            sender: sender,
+            receiver,
+            sender,
             content: message,
         }
     }
@@ -179,7 +179,7 @@ mod tests {
         testing_env!(context.clone());
         let mut contract = Contract::new();
 
-        let vecr = view_methods(&mut contract, context.clone().predecessor_account_id);
+        let vecr = view_methods(&mut contract, context.predecessor_account_id);
 
         assert_eq!(
             {
