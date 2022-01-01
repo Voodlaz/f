@@ -22,23 +22,9 @@ pub struct Message {
 }
 
 // This struct is needed for fn listen in impl contract in the end of file.
-// Also the fields are public only for testing, and should be removed in future
 #[derive(Debug, PanicOnDefault, BorshDeserialize, BorshSerialize, Serialize)]
 #[serde(crate = "near_sdk::serde")]
-pub struct MessageWithLen {
-    pub len: u64,
-    pub content: Vec<Message>,
-}
-
-// used for Contract::lsiten, implemented in the end of file
-impl MessageWithLen {
-    pub fn new(len: u64, content: Vec<Message>) -> Self {
-        MessageWithLen {
-            len,
-            content,
-        }
-    }
-}
+pub struct MessageWithLen(u64, Vec<Message>);
 
 impl Message {
     pub fn new(receiver: Option<String>, sender: String, message: String) -> Self {
@@ -102,7 +88,7 @@ impl Contract {
                     messages.push(message);
                     count += 1;
                 }
-                Some(MessageWithLen::new(len, messages))
+                Some(MessageWithLen(len, messages))
             }
         }
     }
@@ -189,7 +175,7 @@ mod tests {
                 }
                 result
             },
-            contract.get_messages(0).unwrap().content
+            contract.get_messages(0).unwrap().1
         );
     }
 
@@ -209,7 +195,7 @@ mod tests {
                 }
                 result
             },
-            contract.listen(24).unwrap().content
+            contract.listen(24).unwrap().1
         );
     }
 }
