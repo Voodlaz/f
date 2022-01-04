@@ -7,8 +7,6 @@ use crate::*;
 
 use near_sdk::serde::{Deserialize, Serialize};
 
-// TODO We will need a proper struct for account, for holding additional account data
-// like pfp's or whatever
 #[derive(
     Debug, Default, BorshSerialize, BorshDeserialize, PartialEq, Serialize, Deserialize, Clone,
 )]
