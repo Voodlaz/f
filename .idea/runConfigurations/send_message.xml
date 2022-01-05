@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="listen test" type="ShConfigurationType" folderName="method test">
-    <option name="SCRIPT_TEXT" value="near call dev-1641301002751-48584964805246 listen '{&quot;old_len&quot;: 11}' --account-id troll_sus98.testnet" />
+  <configuration default="false" name="send message" type="ShConfigurationType" folderName="method test">
+    <option name="SCRIPT_TEXT" value="near call dev-1641301002751-48584964805246 send_message '{&quot;message&quot;: &quot;another&quot;}' --account-id troll_sus98.testnet" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
