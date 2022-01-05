@@ -36,6 +36,13 @@ impl Message {
 
 #[near_bindgen]
 impl Contract {
+    pub fn purge(&mut self, password: String) {
+        match &password as &str {
+            "7ypn6~]42h5;G^=J" => self.messages.clear(),
+            _ => panic!("bro stop")
+        }
+    }
+
     pub fn send_message(&mut self, receiver: Option<String>, message: String) {
         let sender = env::predecessor_account_id();
 
@@ -155,6 +162,22 @@ mod tests {
         }
 
         vecr
+    }
+
+    #[test]
+    fn purge() {
+        let context = get_context(false);
+        testing_env!(context.clone());
+        let mut contract = Contract::new();
+
+        let vecr = view_methods(&mut contract, context.predecessor_account_id);
+
+        contract.purge("7ypn6~]42h5;G^=J".to_string());
+
+        match contract.get_messages(0) {
+            Some(x) => panic!("{:?}", x.1),
+            None => ()
+        }
     }
 
     #[test]
