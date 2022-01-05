@@ -1,6 +1,10 @@
+// TODO this file should be broken into smaller modules
+// TODO refactor comments
 // Some comments could probably fit in implementation doc
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen};
+use near_sdk::env::panic;
+
 //use std::iter::IntoIterator;
 
 use crate::*;
@@ -17,6 +21,13 @@ pub struct Message {
     receiver: Option<String>,
     sender: String,
     pub content: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub enum ErrorMessage {
+    NoNewMessages,
+    IncorrectData
 }
 
 // This struct is needed for fn listen in impl contract in the end of file.
@@ -50,9 +61,9 @@ impl Contract {
     }
 
     #[private]
-    fn load_messages(&self, amount: u64, levels: u64) -> Option<MessageWithLen> {
+    fn load_messages(&self, amount: u64, levels: u64) -> Result<MessageWithLen, ErrorMessage> {
         match self.messages.is_empty() {
-            true => None,
+            true => Err(ErrorMessage::NoNewMessages),
             false => {
                 let mut count = 1;
                 let len = self.messages.len();
@@ -93,7 +104,7 @@ impl Contract {
                     messages.push(message);
                     count += 1;
                 }
-                Some(MessageWithLen(len, messages))
+                Ok(MessageWithLen(len, messages))
             }
         }
     }
@@ -102,7 +113,7 @@ impl Contract {
     of already loaded messages on client, more 50 messages will
     load(WIP), so he would have a seamless reading experience.
     NOTE: this decison is not final, and can change in future*/
-    pub fn get_messages(&self, levels: u64) -> Option<MessageWithLen> {
+    pub fn get_messages(&self, levels: u64) -> Result<MessageWithLen, ErrorMessage> {
         self.load_messages(50, levels)
     }
 
@@ -114,18 +125,22 @@ impl Contract {
     amount of new messages, which the functions sends to client.*/
     //
     /* should we load only the last ones, or just messages after old_len?*/
-    pub fn listen(&self, old_len: u64) -> Option<MessageWithLen> {
-        let current_len = self.messages.len();
-        let len = current_len - old_len;
+    pub fn listen(&self, old_len: u64) -> Result<MessageWithLen, ErrorMessage> {
+        let len = self.messages.len().checked_sub(old_len);
+        let load_messages = |amount| -> Result<MessageWithLen, ErrorMessage> {self.load_messages(amount, 0)};
 
-        if len > 0 {
-            if len > 50 {
-                self.load_messages(50, 0)
-            } else {
-                self.load_messages(len, 0)
-            }
-        } else {
-            None
+        match len {
+            Some(x) => {
+                match x {
+                    0 => Err(ErrorMessage::NoNewMessages),
+                    _ => {if x > 50 {
+                        load_messages(50)
+                    } else {
+                        load_messages(x)
+                    }}
+                }
+            },
+            None => Err(ErrorMessage::IncorrectData)
         }
     }
 }
@@ -175,8 +190,8 @@ mod tests {
         contract.purge("7ypn6~]42h5;G^=J".to_string());
 
         match contract.get_messages(0) {
-            Some(x) => panic!("{:?}", x.1),
-            None => ()
+            Ok(x) => panic!("it doesn't work. here's what actually there {:?}", x.1),
+            Err(e) => ()
         }
     }
 
