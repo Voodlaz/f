@@ -1,15 +1,14 @@
+use near_sdk::{env, near_bindgen};
 // TODO this file should be broken into smaller modules
 // TODO refactor comments
 // Some comments could probably fit in implementation doc
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::{env, near_bindgen};
 use near_sdk::env::panic;
-
-//use std::iter::IntoIterator;
+use near_sdk::serde::{Deserialize, Serialize};
 
 use crate::*;
 
-use near_sdk::serde::{Deserialize, Serialize};
+//use std::iter::IntoIterator;
 
 #[derive(
     Debug, Default, BorshSerialize, BorshDeserialize, PartialEq, Serialize, Deserialize, Clone,
@@ -50,7 +49,7 @@ impl Contract {
     pub fn purge(&mut self, password: String) {
         match &password as &str {
             "7ypn6~]42h5;G^=J" => self.messages.clear(),
-            _ => panic!("bro stop")
+            _ => panic!("go away")
         }
     }
 
@@ -73,7 +72,12 @@ impl Contract {
                     0 => len_minus_levels = len,
                     // unwrap_or_default maybe changed to just unwrap in the future. see
                     // the if block comments below for more.
-                    _ => len_minus_levels = len.checked_sub(levels * 50).unwrap_or_default(),
+                    _ => len_minus_levels = {
+                        match len.checked_sub(levels * 50) {
+                            Some(x) => x,
+                            None => len % 50,
+                        }
+                    },
                 }
                 /*this if code block moves the len "cursor"(the strating point
                 of reading messages) to the maximum level possible.
@@ -86,23 +90,20 @@ impl Contract {
 
                 u64::default equals to zero, so unwrap_or_default works*/
                 // what about making the fronted able to request max levels?
-                if len_minus_levels == 0 {
-                    len_minus_levels = len % 50;
-                }
 
                 let mut messages: Vec<Message> = Vec::new();
-
-                let default = Message::default();
+                
                 while count < amount + 1 && count < len_minus_levels + 1 {
                     let message = self
                         .messages
-                        .get(len_minus_levels - count)
-                        .unwrap_or_default();
-                    if message == default {
-                        break;
+                        .get(len_minus_levels - count);
+                    match message {
+                        Ok(x) => {
+                            messages.push(x);
+                            count += 1;
+                        },
+                        None => break
                     }
-                    messages.push(message);
-                    count += 1;
                 }
                 Ok(MessageWithLen(len, messages))
             }
@@ -149,10 +150,12 @@ impl Contract {
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod tests {
-    use super::*;
-    use near_sdk::test_utils::VMContextBuilder;
-    use near_sdk::{testing_env, MockedBlockchain, VMContext};
     use std::convert::TryInto;
+
+    use near_sdk::{MockedBlockchain, testing_env, VMContext};
+    use near_sdk::test_utils::VMContextBuilder;
+
+    use super::*;
 
     fn get_context(is_view: bool) -> VMContext {
         VMContextBuilder::new()
