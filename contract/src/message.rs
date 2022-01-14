@@ -26,7 +26,7 @@ pub struct Message {
 #[serde(crate = "near_sdk::serde")]
 pub enum ErrorMessage {
     NoNewMessages,
-    IncorrectData
+    IncorrectData,
 }
 
 // This struct is needed for fn listen in impl contract in the end of file.
@@ -49,7 +49,7 @@ impl Contract {
     pub fn purge(&mut self, password: String) {
         match &password as &str {
             "7ypn6~]42h5;G^=J" => self.messages.clear(),
-            _ => panic!("go away")
+            _ => panic!("go away"),
         }
     }
 
@@ -72,12 +72,14 @@ impl Contract {
                     0 => len_minus_levels = len,
                     // unwrap_or_default maybe changed to just unwrap in the future. see
                     // the if block comments below for more.
-                    _ => len_minus_levels = {
-                        match len.checked_sub(levels * 50) {
-                            Some(x) => x,
-                            None => len % 50,
+                    _ => {
+                        len_minus_levels = {
+                            match len.checked_sub(levels * 50) {
+                                Some(x) => x,
+                                None => len % 50,
+                            }
                         }
-                    },
+                    }
                 }
                 /*this if code block moves the len "cursor"(the strating point
                 of reading messages) to the maximum level possible.
@@ -92,17 +94,15 @@ impl Contract {
                 // what about making the fronted able to request max levels?
 
                 let mut messages: Vec<Message> = Vec::new();
-                
+
                 while count < amount + 1 && count < len_minus_levels + 1 {
-                    let message = self
-                        .messages
-                        .get(len_minus_levels - count);
+                    let message = self.messages.get(len_minus_levels - count);
                     match message {
                         Ok(x) => {
                             messages.push(x);
                             count += 1;
-                        },
-                        None => break
+                        }
+                        None => break,
                     }
                 }
                 Ok(MessageWithLen(len, messages))
@@ -128,20 +128,21 @@ impl Contract {
     /* should we load only the last ones, or just messages after old_len?*/
     pub fn listen(&self, old_len: u64) -> Result<MessageWithLen, ErrorMessage> {
         let len = self.messages.len().checked_sub(old_len);
-        let load_messages = |amount| -> Result<MessageWithLen, ErrorMessage> {self.load_messages(amount, 0)};
+        let load_messages =
+            |amount| -> Result<MessageWithLen, ErrorMessage> { self.load_messages(amount, 0) };
 
         match len {
-            Some(x) => {
-                match x {
-                    0 => Err(ErrorMessage::NoNewMessages),
-                    _ => {if x > 50 {
+            Some(x) => match x {
+                0 => Err(ErrorMessage::NoNewMessages),
+                _ => {
+                    if x > 50 {
                         load_messages(50)
                     } else {
                         load_messages(x)
-                    }}
+                    }
                 }
             },
-            None => Err(ErrorMessage::IncorrectData)
+            None => Err(ErrorMessage::IncorrectData),
         }
     }
 }
@@ -194,7 +195,7 @@ mod tests {
 
         match contract.get_messages(0) {
             Ok(x) => panic!("it doesn't work. here's what actually there {:?}", x.1),
-            Err(e) => ()
+            Err(e) => (),
         }
     }
 

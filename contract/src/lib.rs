@@ -1,9 +1,8 @@
-mod message;
-
+use near_sdk::{near_bindgen, PanicOnDefault, setup_alloc};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::Vector;
-use near_sdk::{near_bindgen, setup_alloc, PanicOnDefault};
 
+mod message;
 
 //use rand::random;
 //use near_sdk::serde::Serialize;
